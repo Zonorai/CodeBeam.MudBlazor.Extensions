@@ -38,18 +38,15 @@ namespace MudExtensions
         ElementReference _reference = new();
         bool _isErasing = true;
         int _lineWidth = 3;
-        //private byte[] _value = Array.Empty<byte>();
         readonly string _id = Guid.NewGuid().ToString();
         string? DrawEraseChipText => _isErasing ? LocalizedStrings.Eraser : LocalizedStrings.Pen;
         string? DrawEraseChipIcon => _isErasing ? Icons.Material.Filled.Edit : Icons.Material.Filled.EditOff;
 
-        private object JsOptionsStruct => new
-        {
-            lineWidth = Options.LineWidth,
-            lineCap = Options.LineCapStyle.ToString().ToLower(),
-            lineJoin = Options.LineJoinStyle.ToString().ToLower(),
-            strokeStyle = Options.StrokeStyle.Value
-        };
+        record JsOptionsStructRecord(decimal LineWidth, string LineCap, string LineJoin, string StrokeStyle);
+
+        private JsOptionsStructRecord JsOptionsStruct => new (Options.LineWidth,
+            Options.LineCapStyle.ToString().ToLower(), Options.LineJoinStyle.ToString().ToLower(),
+            Options.StrokeStyle.Value);
 
         /// <summary>
         /// 
@@ -60,98 +57,118 @@ namespace MudExtensions
         /// <summary>
         /// Fires when value changed.
         /// </summary>
-        [Parameter] public EventCallback<byte[]> ValueChanged { get; set; }
+        [Parameter]
+        public EventCallback<byte[]> ValueChanged { get; set; }
 
         /// <summary>
         /// Localized strings for Signature Pad.
         /// </summary>
-        [Parameter] public SignaturePadLocalizedStrings LocalizedStrings { get; set; } = new();
+        [Parameter]
+        public SignaturePadLocalizedStrings LocalizedStrings { get; set; } = new();
 
         /// <summary>
         /// 
         /// </summary>
-        [Parameter] public SignaturePadOptions Options { get; set; } = new SignaturePadOptions();
+        [Parameter]
+        public SignaturePadOptions Options { get; set; } = new SignaturePadOptions();
 
         /// <summary>
         /// 
         /// </summary>
-        [Parameter] public string? ToolbarClass { get; set; }
+        [Parameter]
+        public string? ToolbarClass { get; set; }
 
         /// <summary>
         /// 
         /// </summary>
-        [Parameter] public string? ToolbarStyle { get; set; }
+        [Parameter]
+        public string? ToolbarStyle { get; set; }
 
         /// <summary>
         /// 
         /// </summary>
-        [Parameter] public string? OuterClass { get; set; }
+        [Parameter]
+        public string? OuterClass { get; set; }
 
         /// <summary>
         /// Shadow level of the component. Default is 4.
         /// </summary>
-        [Parameter] public int Elevation { get; set; } = 4;
+        [Parameter]
+        public int Elevation { get; set; } = 4;
 
         /// <summary>
         /// 
         /// </summary>
-        [Parameter] public string? CanvasContainerClass { get; set; }
+        [Parameter]
+        public string? CanvasContainerClass { get; set; }
 
         /// <summary>
         /// 
         /// </summary>
-        [Parameter] public string? CanvasContainerStyle { get; set; } = "height: 100%;width: 100%; box-shadow: rgb(204, 219, 232) 3px 3px 6px 0px inset, rgba(255, 255, 255, 0.5) -3px -3px 6px 1px inset;";
-        
-        /// <summary>
-        /// 
-        /// </summary>
-        [Parameter] public bool ShowClear { get; set; } = true;
+        [Parameter]
+        public string? CanvasContainerStyle { get; set; } =
+            "height: 100%;width: 100%; box-shadow: rgb(204, 219, 232) 3px 3px 6px 0px inset, rgba(255, 255, 255, 0.5) -3px -3px 6px 1px inset;";
 
         /// <summary>
         /// 
         /// </summary>
-        [Parameter] public bool ShowLineWidth { get; set; } = true;
+        [Parameter]
+        public bool ShowClear { get; set; } = true;
 
         /// <summary>
         /// 
         /// </summary>
-        [Parameter] public bool ShowStrokeStyle { get; set; } = true;
+        [Parameter]
+        public bool ShowLineWidth { get; set; } = true;
 
         /// <summary>
         /// 
         /// </summary>
-        [Parameter] public bool ShowDownload { get; set; } = true;
+        [Parameter]
+        public bool ShowStrokeStyle { get; set; } = true;
 
         /// <summary>
         /// 
         /// </summary>
-        [Parameter] public bool ShowLineJoinStyle { get; set; } = true;
+        [Parameter]
+        public bool ShowDownload { get; set; } = true;
 
         /// <summary>
         /// 
         /// </summary>
-        [Parameter] public bool ShowLineCapStyle { get; set; } = true;
+        [Parameter]
+        public bool ShowLineJoinStyle { get; set; } = true;
 
         /// <summary>
         /// 
         /// </summary>
-        [Parameter] public bool Dense { get; set; }
+        [Parameter]
+        public bool ShowLineCapStyle { get; set; } = true;
 
         /// <summary>
         /// 
         /// </summary>
-        [Parameter] public Variant Variant { get; set; }
+        [Parameter]
+        public bool Dense { get; set; }
 
         /// <summary>
         /// 
         /// </summary>
-        [Parameter] public Color Color { get; set; }
+        [Parameter]
+        public Variant Variant { get; set; }
 
         /// <summary>
         /// 
         /// </summary>
-        [Parameter] public RenderFragment? ToolbarContent { get; set; }
-        
+        [Parameter]
+        public Color Color { get; set; }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        [Parameter]
+        public RenderFragment? ToolbarContent { get; set; }
+
         /// <summary>
         /// 
         /// </summary>
@@ -161,7 +178,8 @@ namespace MudExtensions
         {
             if (firstRender)
             {
-                await JsRuntime.InvokeVoidAsync("mudSignaturePad.addPad", _dotnetObjectRef, _reference, JsOptionsStruct);
+                await JsRuntime.InvokeVoidAsync("mudSignaturePad.addPad", _dotnetObjectRef, _reference,
+                    JsOptionsStruct);
                 if (Value.Length > 0)
                 {
                     await PushImageUpdateToJsRuntime();
@@ -185,7 +203,8 @@ namespace MudExtensions
 
         async Task PushImageUpdateToJsRuntime()
         {
-            await JsRuntime.InvokeVoidAsync("mudSignaturePad.updatePadImage", _reference, Convert.ToBase64String(Value));
+            await JsRuntime.InvokeVoidAsync("mudSignaturePad.updatePadImage", _reference,
+                Convert.ToBase64String(Value));
         }
 
         async Task UpdateOptions()
@@ -258,5 +277,4 @@ namespace MudExtensions
             await ValueChanged.InvokeAsync(Value);
         }
     }
-
 }
